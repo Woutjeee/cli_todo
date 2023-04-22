@@ -1,90 +1,43 @@
 use std::str::FromStr;
-use std::error::Error;
 use clap::Parser;
 
-#[derive(Parser)]
+#[derive(Parser, Debug, PartialEq)]
+#[command(author, version, about, long_about = None)]
+#[command(next_line_help = true)]
 pub struct Cli {
-    pub pattern: String,
-    //pub path: std::path::PathBuf
+    #[arg(short, long)]
+    pub action: String,
+    #[arg(short, long)]
+    pub title: String,
+    #[arg(short, long)]
+    pub description: String
 }
 
-
-#[derive(Debug, PartialEq)]
-pub enum Operation {
-    Get,
-    GetAll,
+#[derive(Debug)]
+pub enum Action {
     Add,
+    Delete,
     Update,
-    Delete
+    Get,
+    GetAll
 }
 
-impl FromStr for Operation {
-    type Err = ();
-    fn from_str(s: &str) -> Result<Operation, Self::Err> {
+impl FromStr for Action {
+    type Err = String;
+    fn from_str(s: &str) -> Result<Action, Self::Err> {
         match s {
-            "get" => Ok(Operation::Get),
-            "getall" => Ok(Operation::GetAll),
-            "add" => Ok(Operation::Add),
-            "update" => Ok(Operation::Update),
-            "delete" => Ok(Operation::Delete),
-            _ => Err(()),
+            "add" | "a" => Ok(Action::Add),
+            "delete" | "d" => Ok(Action::Delete),
+            "update" | "u" => Ok(Action::Update),
+            "get" | "g" => Ok(Action::Get),
+            "getall" | "ga" => Ok(Action::GetAll),
+            _ => Err(format!("Could not parse '{}' to an Action", s))
         }
     }
 }
 
-impl Operation {
-    fn run(args: &[String]) -> Result<(), Box<dyn Error>> {
-        // TODO: Get action user wants to do.
-        // TODO: Check length of args
-
-        Ok(())
-     }
-    
-    pub fn determine_action(action: &Operation) {
-        match action {
-            Operation::Get => println!("Getting todos..."),
-            Operation::Add => println!("Adding todo..."),
-            _ => panic!("Something went wrong..."),
-        };
-    }
-}
-
-#[derive(Debug, PartialEq)]
-pub enum Priority {
-    Low,
-    Medium,
-    High
-}
-
-impl FromStr for Priority {
-    type Err = ();
-    fn from_str(s: &str) -> Result<Priority, Self::Err> {
-        match s {
-            "low" => Ok(Priority::Low),
-            "medium" => Ok(Priority::Medium),
-            "high" => Ok(Priority::High),
-            _ => Err(()),
-        }
-    }
-}
-
+#[derive(Debug)]
 pub struct Todo {
     pub title: String,
-    pub description: String,
-    pub prio: Priority
-}
-
-impl Todo {
-    pub fn new(args: &[String]) -> Result<Todo, &'static str> {
-        if args.len() < 4 {
-            return Err("Not enough parameters");
-        }
-        
-        let title = args[1].clone();
-        let description = args[2].clone();
-        let prio = Priority::from_str(&args[3].clone()).unwrap();
-
-        println!("Creating new todo.");
-        Ok(Todo {title, description, prio})
-    }
+    pub description: String
 }
